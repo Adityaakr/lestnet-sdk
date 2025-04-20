@@ -1,6 +1,6 @@
 {
-  "name": "lestnet-sdk",
-  "version": "0.1.1",
+  "name": "stxn-sdk",
+  "version": "0.1.0",
   "description": "A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain. Built with ethers.js v6, this SDK provides a simple interface for blockchain interactions.",
   "type": "module",
   "main": "dist/index.js",
