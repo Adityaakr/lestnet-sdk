@@ -2,6 +2,65 @@
 
 A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain ID: 21363). Built with ethers.js v6, this SDK provides a simple and intuitive interface for blockchain interactions.
 
+## Why Use This SDK?
+
+### Without SDK (Raw Implementation)
+```typescript
+import { ethers } from 'ethers';
+
+// 1. Connect to Lestnet
+const provider = new ethers.JsonRpcProvider("https://service.lestnet.org");
+await provider.getNetwork().then(network => {
+  if (network.chainId !== 21363n) {
+    throw new Error("Wrong network");
+  }
+});
+
+// 2. Create wallet
+const wallet = ethers.Wallet.createRandom().connect(provider);
+console.log('Address:', wallet.address);
+
+// 3. Send transaction
+const tx = await wallet.sendTransaction({
+  to: "0x...",
+  value: ethers.parseEther("0.1"),
+  maxFeePerGas: await provider.getFeeData().then(f => f.maxFeePerGas),
+  maxPriorityFeePerGas: await provider.getFeeData().then(f => f.maxPriorityFeePerGas),
+});
+
+// 4. Handle errors and retries manually
+let attempts = 0;
+const maxAttempts = 3;
+while (attempts < maxAttempts) {
+  try {
+    await tx.wait();
+    break;
+  } catch (e) {
+    attempts++;
+    await new Promise(r => setTimeout(r, 1000 * attempts));
+  }
+}
+```
+
+### With SDK (Simple & Clean)
+```typescript
+import { getProvider, createRandom, sendTx, lethToWei } from 'stxn-sdk';
+
+// 1. Connect to Lestnet
+const provider = getProvider();
+
+// 2. Create wallet
+const wallet = createRandom();
+console.log('Address:', wallet.address);
+
+// 3. Send transaction (with automatic retries)
+const tx = await sendTx({
+  to: "0x...",
+  value: lethToWei("0.1"),
+  privateKey: wallet.privateKey
+});
+```
+
 ## Features
 
 - 🔌 **Pre-configured Providers** - Connect to Lestnet with one line of code
@@ -12,145 +71,51 @@ A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain I
 - 🔁 **Retry Logic** - Built-in exponential backoff for API calls
 - 📝 **TypeScript Support** - Full type definitions included
 
-## Installation & Setup
+## Quick Start
 
-### Prerequisites
-- Node.js v16 or higher
-- npm v7 or higher
-
-### 1. Create a New Project
 ```bash
-# Create a new directory
-mkdir my-lestnet-app
-cd my-lestnet-app
-
-# Initialize a new npm project
-npm init -y
-
-# If using TypeScript (recommended)
-npm install typescript @types/node --save-dev
-npx tsc --init
-```
-
-### 2. Install the SDK
-```bash
-# Install the SDK and its peer dependencies
+# Install the SDK
 npm install stxn-sdk ethers
 ```
 
-### 3. Basic Setup
-
-#### JavaScript (CommonJS)
-```javascript
-// index.js
-const { getProvider, createRandom } = require('stxn-sdk');
-
-async function main() {
-  const provider = getProvider();
-  const blockNumber = await provider.getBlockNumber();
-  console.log('Current block:', blockNumber);
-}
-
-main();
-```
-
-#### JavaScript (ESM)
-```javascript
-// index.js
-import { getProvider, createRandom } from 'stxn-sdk';
-
-async function main() {
-  const provider = getProvider();
-  const blockNumber = await provider.getBlockNumber();
-  console.log('Current block:', blockNumber);
-}
-
-main();
-```
-
-#### TypeScript
 ```typescript
-// index.ts
-import { getProvider, createRandom, SendTxOptions } from 'stxn-sdk';
+import { 
+  getProvider, 
+  createRandom, 
+  sendTx, 
+  lethToWei,
+  topUpFromFaucet 
+} from 'stxn-sdk';
 
 async function main() {
+  // Connect to network
   const provider = getProvider();
-  const blockNumber = await provider.getBlockNumber();
-  console.log('Current block:', blockNumber);
+  console.log('Chain ID:', (await provider.getNetwork()).chainId.toString());
+
+  // Create wallet
+  const wallet = createRandom();
+  console.log('New wallet:', wallet.address);
+
+  // Get test tokens
+  const faucetTx = await topUpFromFaucet(wallet.address);
+  console.log('Faucet TX:', faucetTx);
+
+  // Send transaction
+  const tx = await sendTx({
+    to: "0x...",
+    value: lethToWei("0.1"),
+    privateKey: wallet.privateKey
+  });
+  console.log('Transaction hash:', tx.hash);
 }
 
 main();
 ```
 
-### 4. Configuration (Optional)
-Create a `.env` file in your project root:
-```env
-PRIVATE_KEY=your_private_key_here
-LESTNET_RPC_URL=https://service.lestnet.org
-```
+## Common Use Cases
 
-### 5. Run Your App
-```bash
-# For JavaScript
-node index.js
-
-# For TypeScript
-npx ts-node index.ts
-```
-
-### Troubleshooting
-
-1. **Module not found errors**
-```bash
-# Check if package.json has "type": "module"
-# If using ESM imports
-```
-
-2. **TypeScript import errors**
-```bash
-# Add to tsconfig.json
-{
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
-  }
-}
-```
-
-3. **Network Connection Issues**
-```javascript
-// Test network connection
-import { getProvider } from 'stxn-sdk';
-
-async function testConnection() {
-  try {
-    const provider = getProvider();
-    const network = await provider.getNetwork();
-    console.log('Connected to:', network.chainId.toString());
-  } catch (error) {
-    console.error('Connection failed:', error);
-  }
-}
-```
-
-## API Reference
-
-### Network Connection
-
-```javascript
-import { getProvider } from 'stxn-sdk';
-
-// HTTP Provider
-const provider = getProvider();  // default
-const httpProvider = getProvider('http');
-
-// WebSocket Provider
-const wsProvider = getProvider('ws');
-```
-
-### Wallet Management
-
-```javascript
+### 1. Wallet Management
+```typescript
 import { createRandom, createFromMnemonic } from 'stxn-sdk';
 
 // Create new wallet
@@ -161,13 +126,12 @@ console.log({
   mnemonic: wallet.mnemonic.phrase
 });
 
-// Recover from mnemonic
+// Recover wallet
 const recoveredWallet = createFromMnemonic('your twelve word mnemonic phrase here');
 ```
 
-### Transactions
-
-```javascript
+### 2. Transaction Handling
+```typescript
 import { sendTx, lethToWei } from 'stxn-sdk';
 
 // Simple transfer
@@ -183,31 +147,29 @@ const blobTx = await sendTx({
   value: lethToWei("0.1"),
   privateKey: senderPrivateKey,
   blobVersionedHashes: [...] // Blob hashes
-  // maxFeePerBlobGas handled automatically
 });
 ```
 
-### Unit Conversions
+### 3. Balance & Units
+```typescript
+import { getProvider, weiToLeth, formatLeth } from 'stxn-sdk';
 
-```javascript
-import { lethToWei, weiToLeth, formatLeth } from 'stxn-sdk';
+const provider = getProvider();
 
-// Convert to Wei for transactions
-const weiAmount = lethToWei("1.5");  // 1500000000000000000n
+// Get balance
+const balance = await provider.getBalance(address);
 
-// Convert from Wei for display
-const lethAmount = weiToLeth("1500000000000000000");  // "1.5"
+// Convert to LETH
+console.log('Balance:', weiToLeth(balance)); // "1.5"
 
 // Format with symbol
-const formatted = formatLeth("1500000000000000000");  // "1.5 LETH"
+console.log('Balance:', formatLeth(balance)); // "1.5 LETH"
 ```
 
-### Error Handling
-
-```javascript
+### 4. Error Handling
+```typescript
 import { withRetry } from 'stxn-sdk';
 
-// Automatic retry with exponential backoff
 const result = await withRetry(
   async () => {
     // Your API call here
@@ -215,8 +177,7 @@ const result = await withRetry(
   },
   {
     maxAttempts: 3,
-    initialDelay: 1000,  // 1 second
-    maxDelay: 10000      // 10 seconds
+    initialDelay: 1000
   }
 );
 ```
@@ -266,4 +227,4 @@ ISC
 
 ## Support
 
-For support, please open an issue in the GitHub repository or reach out to the Lestnet team.
+For support, please open an issue in the GitHub repository.
