@@ -2,6 +2,16 @@
 
 A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain ID: 21363). Built with ethers.js v6, this SDK simplifies blockchain interactions with pre-configured network settings and developer-friendly utilities.
 
+## Features
+
+- 🔌 **Pre-configured Providers** - Connect to Lestnet with one line of code
+- 💳 **Wallet Management** - Create, recover, and manage wallets easily
+- 📦 **Transaction Handling** - Send transactions with built-in Cancun fork support
+- 💧 **Faucet Integration** - Request test LETH directly through the SDK
+- 🔄 **Unit Conversions** - Easy conversion between LETH and Wei
+- 🔁 **Retry Logic** - Built-in exponential backoff for API calls
+- 📝 **TypeScript Support** - Full type definitions included
+
 ## Installation & Setup
 
 ### Prerequisites
@@ -121,44 +131,6 @@ async function testConnection() {
     console.error('Connection failed:', error);
   }
 }
-```
-
-## Features
-
-- 🔌 **Pre-configured Providers** - Connect to Lestnet with one line of code
-- 💳 **Wallet Management** - Create, recover, and manage wallets easily
-- 📦 **Transaction Handling** - Send transactions with built-in Cancun fork support
-- 💧 **Faucet Integration** - Request test LETH directly through the SDK
-- 🔄 **Unit Conversions** - Easy conversion between LETH and Wei
-- 🔁 **Retry Logic** - Built-in exponential backoff for API calls
-- 📝 **TypeScript Support** - Full type definitions included
-
-## Quick Start
-
-```javascript
-import { 
-  getProvider, 
-  createRandom, 
-  sendTx, 
-  lethToWei 
-} from '@lestnet/sdk';
-
-// Create a new wallet
-const wallet = createRandom();
-console.log('Wallet address:', wallet.address);
-
-// Connect to Lestnet
-const provider = getProvider();
-const network = await provider.getNetwork();
-console.log('Connected to chain:', network.chainId.toString());
-
-// Send a transaction
-const tx = await sendTx({
-  to: "0x...",
-  value: lethToWei("0.1"),
-  privateKey: wallet.privateKey
-});
-console.log('Transaction hash:', tx.hash);
 ```
 
 ## API Reference
@@ -294,5 +266,4 @@ ISC
 
 ## Support
 
-For support, please open an issue in the GitHub repository or reach out to the Lestnet team. # sdk
-# lestnet-sdk
+For support, please open an issue in the GitHub repository or reach out to the Lestnet team.
