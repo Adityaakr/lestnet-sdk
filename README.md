@@ -1,76 +1,263 @@
 # Lestnet SDK
 
-A TypeScript SDK for interacting with the Lestnet blockchain (Chain ID 21363).
+A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain ID: 21363). Built with ethers.js v6, this SDK simplifies blockchain interactions with pre-configured network settings and developer-friendly utilities.
 
-## Installation
+## Installation & Setup
 
+### Prerequisites
+- Node.js v16 or higher
+- npm v7 or higher
+
+### 1. Create a New Project
 ```bash
-npm install lestnet-sdk
+# Create a new directory
+mkdir my-lestnet-app
+cd my-lestnet-app
+
+# Initialize a new npm project
+npm init -y
+
+# If using TypeScript (recommended)
+npm install typescript @types/node --save-dev
+npx tsc --init
 ```
 
-## Quick Start
+### 2. Install the SDK
+```bash
+# Install the SDK and its peer dependencies
+npm install @lestnet/sdk ethers
+```
 
-```typescript
-import { getProvider, sendTx, lethToWei } from "lestnet-sdk";
+### 3. Basic Setup
+
+#### JavaScript (CommonJS)
+```javascript
+// index.js
+const { getProvider, createRandom } = require('@lestnet/sdk');
 
 async function main() {
-  // Get a provider
   const provider = getProvider();
-  
-  // Get the latest block number
   const blockNumber = await provider.getBlockNumber();
-  console.log("Latest block:", blockNumber);
-  
-  // Send a transaction
-  const tx = await sendTx({
-    to: "0x...",
-    value: lethToWei("0.1"),
-    privateKey: "0x...",
-  });
-  
-  console.log("Transaction hash:", tx.hash);
+  console.log('Current block:', blockNumber);
 }
 
 main();
 ```
 
+#### JavaScript (ESM)
+```javascript
+// index.js
+import { getProvider, createRandom } from '@lestnet/sdk';
+
+async function main() {
+  const provider = getProvider();
+  const blockNumber = await provider.getBlockNumber();
+  console.log('Current block:', blockNumber);
+}
+
+main();
+```
+
+#### TypeScript
+```typescript
+// index.ts
+import { getProvider, createRandom, SendTxOptions } from '@lestnet/sdk';
+
+async function main() {
+  const provider = getProvider();
+  const blockNumber = await provider.getBlockNumber();
+  console.log('Current block:', blockNumber);
+}
+
+main();
+```
+
+### 4. Configuration (Optional)
+Create a `.env` file in your project root:
+```env
+PRIVATE_KEY=your_private_key_here
+LESTNET_RPC_URL=https://service.lestnet.org
+```
+
+### 5. Run Your App
+```bash
+# For JavaScript
+node index.js
+
+# For TypeScript
+npx ts-node index.ts
+```
+
+### Troubleshooting
+
+1. **Module not found errors**
+```bash
+# Check if package.json has "type": "module"
+# If using ESM imports
+```
+
+2. **TypeScript import errors**
+```bash
+# Add to tsconfig.json
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  }
+}
+```
+
+3. **Network Connection Issues**
+```javascript
+// Test network connection
+import { getProvider } from '@lestnet/sdk';
+
+async function testConnection() {
+  try {
+    const provider = getProvider();
+    const network = await provider.getNetwork();
+    console.log('Connected to:', network.chainId.toString());
+  } catch (error) {
+    console.error('Connection failed:', error);
+  }
+}
+```
+
 ## Features
 
-- Pre-configured providers (HTTP and WebSocket)
-- Transaction handling with Cancun fork support
-- HD wallet utilities
-- Unit conversion helpers
-- Retry logic with exponential backoff
-- TypeScript support
+- 🔌 **Pre-configured Providers** - Connect to Lestnet with one line of code
+- 💳 **Wallet Management** - Create, recover, and manage wallets easily
+- 📦 **Transaction Handling** - Send transactions with built-in Cancun fork support
+- 💧 **Faucet Integration** - Request test LETH directly through the SDK
+- 🔄 **Unit Conversions** - Easy conversion between LETH and Wei
+- 🔁 **Retry Logic** - Built-in exponential backoff for API calls
+- 📝 **TypeScript Support** - Full type definitions included
+
+## Quick Start
+
+```javascript
+import { 
+  getProvider, 
+  createRandom, 
+  sendTx, 
+  lethToWei 
+} from '@lestnet/sdk';
+
+// Create a new wallet
+const wallet = createRandom();
+console.log('Wallet address:', wallet.address);
+
+// Connect to Lestnet
+const provider = getProvider();
+const network = await provider.getNetwork();
+console.log('Connected to chain:', network.chainId.toString());
+
+// Send a transaction
+const tx = await sendTx({
+  to: "0x...",
+  value: lethToWei("0.1"),
+  privateKey: wallet.privateKey
+});
+console.log('Transaction hash:', tx.hash);
+```
 
 ## API Reference
 
-### Core
+### Network Connection
 
-- `getProvider(kind?: "http" | "ws")` - Get a pre-configured provider
-- `CHAIN_ID` - Lestnet chain ID (21363)
-- `RPC_URLS` - RPC endpoint URLs
-- `EXPLORER_URL` - Block explorer URL
-- `EVM_FORK` - Current EVM fork name
+```javascript
+import { getProvider } from '@lestnet/sdk';
 
-### Wallet
+// HTTP Provider
+const provider = getProvider();  // default
+const httpProvider = getProvider('http');
 
-- `createFromMnemonic(mnemonic: string)` - Create wallet from mnemonic
-- `createRandom()` - Create a random wallet
-- `topUpFromFaucet(address: string)` - Request test LETH from faucet
-- `getWallet(options: WalletOptions)` - Get wallet instance
+// WebSocket Provider
+const wsProvider = getProvider('ws');
+```
 
-### Transaction
+### Wallet Management
 
-- `sendTx(options: SendTxOptions)` - Send a transaction
-- `bundleAndSend(blobTxs: TransactionRequest[], privateKey: string)` - Send multiple blob transactions
+```javascript
+import { createRandom, createFromMnemonic } from '@lestnet/sdk';
 
-### Helpers
+// Create new wallet
+const wallet = createRandom();
+console.log({
+  address: wallet.address,
+  privateKey: wallet.privateKey,
+  mnemonic: wallet.mnemonic.phrase
+});
 
-- `lethToWei(amount: string | number)` - Convert LETH to wei
-- `weiToLeth(amount: bigint | string)` - Convert wei to LETH
-- `formatUSD(amount: number)` - Format number as USD
-- `formatLeth(amount: bigint | string)` - Format wei as LETH
+// Recover from mnemonic
+const recoveredWallet = createFromMnemonic('your twelve word mnemonic phrase here');
+```
+
+### Transactions
+
+```javascript
+import { sendTx, lethToWei } from '@lestnet/sdk';
+
+// Simple transfer
+const tx = await sendTx({
+  to: receiverAddress,
+  value: lethToWei("0.1"),
+  privateKey: senderPrivateKey
+});
+
+// With blob data (EIP-4844)
+const blobTx = await sendTx({
+  to: receiverAddress,
+  value: lethToWei("0.1"),
+  privateKey: senderPrivateKey,
+  blobVersionedHashes: [...] // Blob hashes
+  // maxFeePerBlobGas handled automatically
+});
+```
+
+### Unit Conversions
+
+```javascript
+import { lethToWei, weiToLeth, formatLeth } from '@lestnet/sdk';
+
+// Convert to Wei for transactions
+const weiAmount = lethToWei("1.5");  // 1500000000000000000n
+
+// Convert from Wei for display
+const lethAmount = weiToLeth("1500000000000000000");  // "1.5"
+
+// Format with symbol
+const formatted = formatLeth("1500000000000000000");  // "1.5 LETH"
+```
+
+### Error Handling
+
+```javascript
+import { withRetry } from '@lestnet/sdk';
+
+// Automatic retry with exponential backoff
+const result = await withRetry(
+  async () => {
+    // Your API call here
+    return await provider.getBalance(address);
+  },
+  {
+    maxAttempts: 3,
+    initialDelay: 1000,  // 1 second
+    maxDelay: 10000      // 10 seconds
+  }
+);
+```
+
+## Network Information
+
+- **Chain ID**: 21363
+- **Network Name**: Lestnet
+- **RPC Endpoints**:
+  - HTTP: https://service.lestnet.org
+  - WebSocket: wss://service.lestnet.org/ws
+- **Block Explorer**: https://explorer.lestnet.org
+- **EVM Fork**: Cancun
 
 ## Development
 
@@ -78,7 +265,7 @@ main();
 # Install dependencies
 npm install
 
-# Build the SDK
+# Build
 npm run build
 
 # Run tests
@@ -87,10 +274,24 @@ npm test
 # Run tests in watch mode
 npm run test:watch
 
-# Lint code
+# Lint
 npm run lint
 ```
 
+## Examples
+
+Check the [examples](./examples) directory for more detailed examples:
+- [Basic Usage](./examples/basic-usage.js) - Simple provider and transaction examples
+- [Complete Demo](./examples/demo.js) - Comprehensive SDK feature demonstration
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
 ## License
 
-ISC 
+ISC
+
+## Support
+
+For support, please open an issue in the GitHub repository or reach out to the Lestnet team. # sdk
