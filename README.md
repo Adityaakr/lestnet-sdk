@@ -70,13 +70,18 @@ const tx = await sendTx({
 - 🔄 **Unit Conversions** - Easy conversion between LETH and Wei
 - 🔁 **Retry Logic** - Built-in exponential backoff for API calls
 - 📝 **TypeScript Support** - Full type definitions included
+- 🛠️ **Smart Contract Tools** - Deploy and interact with contracts using CLI
+- 🔄 **Blob Transactions** - Support for EIP-4844 blob transactions
+- 🖥️ **CLI Interface** - Command-line tools for common operations
 
-## Quick Start
+## Installation
 
 ```bash
 # Install the SDK
 npm install stxn-sdk ethers
 ```
+
+## Quick Start
 
 ```typescript
 import { 
@@ -112,6 +117,30 @@ async function main() {
 main();
 ```
 
+## CLI Usage
+
+The SDK comes with a built-in CLI for common operations:
+
+```bash
+# Install globally
+npm install -g stxn-sdk
+
+# Check wallet balance
+stxn balance 0x...
+
+# Create new wallet
+stxn create-wallet
+
+# Request test tokens
+stxn faucet 0x...
+
+# Send LETH
+stxn send <to-address> <amount> <private-key>
+
+# Deploy contract
+stxn deploy <contract-file> -p <private-key> -c <constructor-args>
+```
+
 ## Common Use Cases
 
 ### 1. Wallet Management
@@ -132,7 +161,7 @@ const recoveredWallet = createFromMnemonic('your twelve word mnemonic phrase her
 
 ### 2. Transaction Handling
 ```typescript
-import { sendTx, lethToWei } from 'stxn-sdk';
+import { sendTx, lethToWei, bundleAndSend } from 'stxn-sdk';
 
 // Simple transfer
 const tx = await sendTx({
@@ -148,9 +177,47 @@ const blobTx = await sendTx({
   privateKey: senderPrivateKey,
   blobVersionedHashes: [...] // Blob hashes
 });
+
+// Bundle multiple transactions
+const txs = await bundleAndSend([
+  {
+    to: receiver1,
+    value: lethToWei("0.1")
+  },
+  {
+    to: receiver2,
+    value: lethToWei("0.2")
+  }
+], senderPrivateKey);
 ```
 
-### 3. Balance & Units
+### 3. Smart Contract Deployment
+```typescript
+// Using CLI
+stxn deploy MyContract.sol -p <private-key> -c 42,true,"Hello"
+
+// Using SDK
+import { lestnet } from 'stxn-sdk';
+import { ethers } from 'ethers';
+
+async function deployContract() {
+  const provider = lestnet();
+  const wallet = new ethers.Wallet(privateKey, provider);
+  
+  const factory = new ethers.ContractFactory(
+    contractABI,
+    contractBytecode,
+    wallet
+  );
+
+  const contract = await factory.deploy(...constructorArgs);
+  await contract.waitForDeployment();
+  
+  console.log('Contract deployed to:', await contract.getAddress());
+}
+```
+
+### 4. Balance & Units
 ```typescript
 import { lestnet, weiToLeth, formatLeth } from 'stxn-sdk';
 
@@ -166,14 +233,21 @@ console.log('Balance:', weiToLeth(balance)); // "1.5"
 console.log('Balance:', formatLeth(balance)); // "1.5 LETH"
 ```
 
-### 4. Error Handling
+### 5. Error Handling
 ```typescript
-import { withRetry } from 'stxn-sdk';
+import { withRetry, isRpcError, parseRpcError } from 'stxn-sdk';
 
 const result = await withRetry(
   async () => {
-    // Your API call here
-    return await provider.getBalance(address);
+    try {
+      return await provider.getBalance(address);
+    } catch (error) {
+      if (isRpcError(error)) {
+        const { code, message } = parseRpcError(error);
+        // Handle specific RPC errors
+      }
+      throw error;
+    }
   },
   {
     maxAttempts: 3,
@@ -190,7 +264,8 @@ const result = await withRetry(
   - HTTP: https://service.lestnet.org
   - WebSocket: wss://service.lestnet.org/ws
 - **Block Explorer**: https://explorer.lestnet.org
-- **EVM Fork**: Cancun
+- **EVM Fork**: Cancun (with EIP-4844 support)
+- **Faucet**: https://faucet.lestnet.org
 
 ## Development
 
@@ -216,6 +291,38 @@ npm run lint
 Check the [examples](./examples) directory for more detailed examples:
 - [Basic Usage](./examples/basic-usage.js) - Simple provider and transaction examples
 - [Complete Demo](./examples/demo.js) - Comprehensive SDK feature demonstration
+- [Contract Deployment](./examples/deploy-contract.js) - Smart contract deployment example
+- [CLI Usage](./examples/cli) - Command-line interface examples
+
+## API Reference
+
+### Core
+- `lestnet(kind?: "http" | "ws")` - Create a provider instance
+- `NETWORK_METADATA` - Network configuration constants
+- `RPC_URLS` - Available RPC endpoints
+- `EXPLORER_URL` - Block explorer URL
+- `EVM_FORK` - Current EVM fork version
+
+### Wallet
+- `createRandom()` - Create a new random wallet
+- `createFromMnemonic(mnemonic: string)` - Recover wallet from mnemonic
+- `topUpFromFaucet(address: string)` - Request test LETH
+- `getWallet(options: WalletOptions)` - Get wallet instance
+
+### Transaction
+- `sendTx(options: SendTxOptions)` - Send a transaction
+- `bundleAndSend(txs: TransactionRequest[], privateKey: string)` - Send multiple transactions
+
+### Helpers
+- `lethToWei(amount: string)` - Convert LETH to Wei
+- `weiToLeth(amount: bigint)` - Convert Wei to LETH
+- `formatLeth(amount: bigint)` - Format amount with LETH symbol
+- `formatUSD(amount: number)` - Format amount in USD
+
+### Utils
+- `withRetry(fn: Function, options: RetryOptions)` - Retry function with backoff
+- `isRpcError(error: unknown)` - Check if error is RPC error
+- `parseRpcError(error: unknown)` - Parse RPC error details
 
 ## Contributing
 
@@ -227,4 +334,12 @@ ISC
 
 ## Support
 
-For support, please open an issue in the GitHub repository.
+For support:
+1. Check the [examples](./examples) directory
+2. Read the [API documentation](#api-reference)
+3. Open an issue in the GitHub repository
+4. Join our [Discord community](https://discord.gg/lestnet)
+
+## Security
+
+If you discover a security vulnerability, please send an email to security@lestnet.org. All security vulnerabilities will be promptly addressed.
