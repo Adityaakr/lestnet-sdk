@@ -1,5 +1,5 @@
 import { Wallet, HDNodeWallet } from "ethers";
-import { getProvider } from "../core/provider.js";
+import { lestnet } from "../core/provider.js";
 import { withRetry } from "../utils/retry.js";
 
 export interface WalletOptions {
@@ -16,7 +16,7 @@ export function createRandom(): HDNodeWallet {
 }
 
 export async function topUpFromFaucet(address: string): Promise<string> {
-  const provider = getProvider();
+  const provider = lestnet();
   
   return withRetry(async () => {
     const response = await fetch("https://faucet.lestnet.org/api/v1/faucet", {
@@ -38,12 +38,12 @@ export async function topUpFromFaucet(address: string): Promise<string> {
 
 export function getWallet(options: WalletOptions): Wallet {
   if (options.privateKey) {
-    return new Wallet(options.privateKey, getProvider());
+    return new Wallet(options.privateKey, lestnet());
   }
   
   if (options.mnemonic) {
     const hdNode = createFromMnemonic(options.mnemonic);
-    return new Wallet(hdNode.privateKey, getProvider());
+    return new Wallet(hdNode.privateKey, lestnet());
   }
 
   throw new Error("Either mnemonic or privateKey must be provided");
