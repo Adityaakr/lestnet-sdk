@@ -1,6 +1,6 @@
 # Lestnet SDK
 
-A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain ID: 21363). Built with ethers.js v6, this SDK simplifies blockchain interactions with pre-configured network settings and developer-friendly utilities.
+A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain (Chain ID: 21363). Built with ethers.js v6, this SDK provides a simple and intuitive interface for blockchain interactions.
 
 ## Features
 
@@ -35,7 +35,7 @@ npx tsc --init
 ### 2. Install the SDK
 ```bash
 # Install the SDK and its peer dependencies
-npm install @lestnet/sdk ethers
+npm install lestnet-sdk ethers
 ```
 
 ### 3. Basic Setup
@@ -43,7 +43,7 @@ npm install @lestnet/sdk ethers
 #### JavaScript (CommonJS)
 ```javascript
 // index.js
-const { getProvider, createRandom } = require('@lestnet/sdk');
+const { getProvider, createRandom } = require('lestnet-sdk');
 
 async function main() {
   const provider = getProvider();
@@ -57,7 +57,7 @@ main();
 #### JavaScript (ESM)
 ```javascript
 // index.js
-import { getProvider, createRandom } from '@lestnet/sdk';
+import { getProvider, createRandom } from 'lestnet-sdk';
 
 async function main() {
   const provider = getProvider();
@@ -71,7 +71,7 @@ main();
 #### TypeScript
 ```typescript
 // index.ts
-import { getProvider, createRandom, SendTxOptions } from '@lestnet/sdk';
+import { getProvider, createRandom, SendTxOptions } from 'lestnet-sdk';
 
 async function main() {
   const provider = getProvider();
@@ -120,7 +120,7 @@ npx ts-node index.ts
 3. **Network Connection Issues**
 ```javascript
 // Test network connection
-import { getProvider } from '@lestnet/sdk';
+import { getProvider } from 'lestnet-sdk';
 
 async function testConnection() {
   try {
@@ -138,7 +138,7 @@ async function testConnection() {
 ### Network Connection
 
 ```javascript
-import { getProvider } from '@lestnet/sdk';
+import { getProvider } from 'lestnet-sdk';
 
 // HTTP Provider
 const provider = getProvider();  // default
@@ -151,7 +151,7 @@ const wsProvider = getProvider('ws');
 ### Wallet Management
 
 ```javascript
-import { createRandom, createFromMnemonic } from '@lestnet/sdk';
+import { createRandom, createFromMnemonic } from 'lestnet-sdk';
 
 // Create new wallet
 const wallet = createRandom();
@@ -168,7 +168,7 @@ const recoveredWallet = createFromMnemonic('your twelve word mnemonic phrase her
 ### Transactions
 
 ```javascript
-import { sendTx, lethToWei } from '@lestnet/sdk';
+import { sendTx, lethToWei } from 'lestnet-sdk';
 
 // Simple transfer
 const tx = await sendTx({
@@ -190,7 +190,7 @@ const blobTx = await sendTx({
 ### Unit Conversions
 
 ```javascript
-import { lethToWei, weiToLeth, formatLeth } from '@lestnet/sdk';
+import { lethToWei, weiToLeth, formatLeth } from 'lestnet-sdk';
 
 // Convert to Wei for transactions
 const weiAmount = lethToWei("1.5");  // 1500000000000000000n
@@ -205,7 +205,7 @@ const formatted = formatLeth("1500000000000000000");  // "1.5 LETH"
 ### Error Handling
 
 ```javascript
-import { withRetry } from '@lestnet/sdk';
+import { withRetry } from 'lestnet-sdk';
 
 // Automatic retry with exponential backoff
 const result = await withRetry(

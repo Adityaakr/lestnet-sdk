@@ -1,7 +1,7 @@
 {
-  "name": "@lestnet/sdk",
+  "name": "lestnet-sdk",
   "version": "0.1.0",
-  "description": "Official SDK for interacting with the Lestnet blockchain",
+  "description": "A TypeScript/JavaScript SDK for interacting with the Lestnet blockchain. Built with ethers.js v6, this SDK provides a simple interface for blockchain interactions.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,12 +16,12 @@
     "lint": "eslint src --ext .ts",
     "prepare": "npm run build"
   },
-  "keywords": ["blockchain", "ethereum", "lestnet", "sdk", "web3"],
-  "author": "Lestnet Team",
+  "keywords": ["blockchain", "ethereum", "lestnet", "sdk", "web3", "defi"],
+  "author": "Aditya Kumar",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lestnet/sdk"
+    "url": "https://github.com/Adityaakr/lestnet-sdk.git"
   },
   "dependencies": {
     "ethers": "^6.13.5"
