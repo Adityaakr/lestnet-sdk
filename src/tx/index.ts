@@ -1,12 +1,12 @@
 import { Wallet, TransactionRequest } from "ethers";
-import { getProvider } from "../core/provider.js";
+import { lestnet } from "../core/provider.js";
 
 export interface SendTxOptions extends TransactionRequest {
   privateKey: string;
 }
 
 export async function sendTx(options: SendTxOptions) {
-  const provider = getProvider();
+  const provider = lestnet();
   const wallet = new Wallet(options.privateKey, provider);
 
   // Handle blob transaction defaults for Cancun
@@ -19,7 +19,7 @@ export async function sendTx(options: SendTxOptions) {
 }
 
 export async function bundleAndSend(blobTxs: TransactionRequest[], privateKey: string) {
-  const provider = getProvider();
+  const provider = lestnet();
   const wallet = new Wallet(privateKey, provider);
 
   const txs = await Promise.all(

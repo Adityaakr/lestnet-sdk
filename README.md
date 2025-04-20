@@ -44,10 +44,10 @@ while (attempts < maxAttempts) {
 
 ### With SDK (Simple & Clean)
 ```typescript
-import { getProvider, createRandom, sendTx, lethToWei } from 'stxn-sdk';
+import { lestnet, createRandom, sendTx, lethToWei } from 'stxn-sdk';
 
 // 1. Connect to Lestnet
-const provider = getProvider();
+const provider = lestnet();
 
 // 2. Create wallet
 const wallet = createRandom();
@@ -80,7 +80,7 @@ npm install stxn-sdk ethers
 
 ```typescript
 import { 
-  getProvider, 
+  lestnet, 
   createRandom, 
   sendTx, 
   lethToWei,
@@ -89,7 +89,7 @@ import {
 
 async function main() {
   // Connect to network
-  const provider = getProvider();
+  const provider = lestnet();
   console.log('Chain ID:', (await provider.getNetwork()).chainId.toString());
 
   // Create wallet
@@ -152,9 +152,9 @@ const blobTx = await sendTx({
 
 ### 3. Balance & Units
 ```typescript
-import { getProvider, weiToLeth, formatLeth } from 'stxn-sdk';
+import { lestnet, weiToLeth, formatLeth } from 'stxn-sdk';
 
-const provider = getProvider();
+const provider = lestnet();
 
 // Get balance
 const balance = await provider.getBalance(address);
